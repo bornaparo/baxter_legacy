@@ -1,0 +1,9 @@
+catkin-tools
+libboost-dev
+libboost-system-dev
+libpoco-dev
+libopencv-dev
+libgpgme-dev
+python3-pycryptodome
+python3-gnupg
+python3-defusedxml
