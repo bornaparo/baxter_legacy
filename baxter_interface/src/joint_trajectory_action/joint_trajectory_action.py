@@ -34,7 +34,8 @@ import math
 import operator
 import numpy as np
 
-import bezier
+# import bezier #this throws modulenotfound error
+from . import bezier #with this works
 
 import rospy
 
@@ -195,34 +196,39 @@ class JointTrajectoryActionServer(object):
         return zip(joint_names, error)
 
     def _update_feedback(self, cmd_point, jnt_names, cur_time):
-        self._fdbk.header.stamp = rospy.Duration.from_sec(rospy.get_time())
+        # self._fdbk.header.stamp = rospy.Duration.from_sec(rospy.get_time()) #theirs, throws error
+        self._fdbk.header.stamp = rospy.Time.now() #moje
         self._fdbk.joint_names = jnt_names
         self._fdbk.desired = cmd_point
         self._fdbk.desired.time_from_start = rospy.Duration.from_sec(cur_time)
         self._fdbk.actual.positions = self._get_current_position(jnt_names)
         self._fdbk.actual.time_from_start = rospy.Duration.from_sec(cur_time)
-        self._fdbk.error.positions = map(operator.sub,
+        # self._fdbk.error.positions = map(operator.sub, #theirs, throws error that map doesn't havee len function
+        #                                  self._fdbk.desired.positions,
+        #                                  self._fdbk.actual.positions
+        #                                 )
+        self._fdbk.error.positions = list(map(operator.sub, #mine
                                          self._fdbk.desired.positions,
                                          self._fdbk.actual.positions
-                                        )
+                                        ))
         self._fdbk.error.time_from_start = rospy.Duration.from_sec(cur_time)
         self._server.publish_feedback(self._fdbk)
 
     def _reorder_joints_ff_cmd(self, joint_names, point):
-	joint_name_order = self._limb.joint_names()
-	pnt = JointTrajectoryPoint()
-	pnt.time_from_start = point.time_from_start
-	pos_cmd = dict(zip(joint_names, point.positions))
-	for jnt_name in joint_name_order:
-	    pnt.positions.append(pos_cmd[jnt_name])
+        joint_name_order = self._limb.joint_names()
+        pnt = JointTrajectoryPoint()
+        pnt.time_from_start = point.time_from_start
+        pos_cmd = dict(zip(joint_names, point.positions))
+        for jnt_name in joint_name_order:
+            pnt.positions.append(pos_cmd[jnt_name])
         if point.velocities:
-	    vel_cmd = dict(zip(joint_names, point.velocities))
-	    for jnt_name in joint_name_order:
-	        pnt.velocities.append(vel_cmd[jnt_name])
+            vel_cmd = dict(zip(joint_names, point.velocities))
+            for jnt_name in joint_name_order:
+                pnt.velocities.append(vel_cmd[jnt_name])
         if point.accelerations:
-	    accel_cmd = dict(zip(joint_names, point.accelerations))
-	    for jnt_name in joint_name_order:
-	        pnt.accelerations.append(accel_cmd[jnt_name])
+            accel_cmd = dict(zip(joint_names, point.accelerations))
+            for jnt_name in joint_name_order:
+                pnt.accelerations.append(accel_cmd[jnt_name])
         return pnt
 
     def _command_stop(self, joint_names, joint_angles, start_time, dimensions_dict):
@@ -318,7 +324,7 @@ class JointTrajectoryActionServer(object):
         num_traj_dim = sum(dimensions_dict.values())
         num_b_values = len(['b0', 'b1', 'b2', 'b3'])
         b_matrix = np.zeros(shape=(num_joints, num_traj_dim, num_traj_pts-1, num_b_values))
-        for jnt in xrange(num_joints):
+        for jnt in range(num_joints):
             traj_array = np.zeros(shape=(len(trajectory_points), num_traj_dim))
             for idx, point in enumerate(trajectory_points):
                 current_point = list()
@@ -429,7 +435,7 @@ class JointTrajectoryActionServer(object):
                 cmd_time = 0
                 t = 0
 
-	    point = self._get_bezier_point(b_matrix, idx,
+            point = self._get_bezier_point(b_matrix, idx,
                                            t, cmd_time,
 				           dimensions_dict)
 

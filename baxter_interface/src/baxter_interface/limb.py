@@ -421,20 +421,31 @@ class Limb(object):
         move is considered successful [0.008726646]
         @param test: optional function returning True if motion must be aborted
         """
-        cmd = self.joint_angles()
+        cmd = self.joint_angles() #trenutni zakreti zglobova
 
         def filtered_cmd():
             # First Order Filter - 0.2 Hz Cutoff
             for joint in positions.keys():
-                cmd[joint] = 0.012488 * positions[joint] + 0.98751 * cmd[joint]
+                cmd[joint] = 0.012488 * positions[joint] + 0.98751 * cmd[joint] #wtf stavi da mu je goal 98% trenutne vrijednosti i 2% nove???,, ali s tim dode nekako u dobru poziciju (tj u tocne zakrete tako da pusti)
             return cmd
+        
+        # ####moje, debug
+        # tmp = self.joint_angles() #da ne bi promjenio ovo s cim upravlja
+        # def filtered_cmd_debug():
+        #     for joint in positions.keys():
+        #         tmp[joint] = 0.012488 * positions[joint] + 0.98751 * tmp[joint]
+        #     return tmp
+        # rospy.loginfo(f"current joint angles: {tmp}")
+        # rospy.loginfo(f"goal joint angles: {positions}")
+        # rospy.loginfo(f"filtered goal joint angles: {filtered_cmd_debug()}")
+        # ####
 
-        def genf(joint, angle):
-            def joint_diff():
+        def genf(joint, angle): #ovo je dekorator
+            def joint_diff(): #unutarnja funkcija moze koristit argumente vanjske funkcije bez da joj ih zadas
                 return abs(angle - self._joint_angle[joint])
             return joint_diff
 
-        diffs = [genf(j, a) for j, a in positions.items() if
+        diffs = [genf(j, a) for j, a in positions.items() if #ovo je lista funkcija
                  j in self._joint_angle]
 
         self.set_joint_positions(filtered_cmd())

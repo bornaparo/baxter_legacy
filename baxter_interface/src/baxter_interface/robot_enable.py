@@ -194,7 +194,7 @@ http://sdk.rethinkrobotics.com/wiki/RSDK_Shell#Initialize
         to False.
         """
         param_name = "rethink/software_version"
-        sdk_version = settings.SDK_VERSION
+        sdk_version = settings.SDK_VERSION #1.2.0.57
 
         # get local lock for rosparam threading bug
         with self.__class__.param_lock:
@@ -214,6 +214,8 @@ http://sdk.rethinkrobotics.com/wiki/RSDK_Shell#Initialize
                               robot_version)
                 return False
             robot_version = match.string[match.start(1):match.end(3)]
+            print(f"[MOJE] RobotEnable version_check(), robot_version: {robot_version}") #1.2.0
+            print(f"[MOJE] RobotEnable version_check(), sdk_version: {sdk_version}") #1.2.0
             if robot_version not in settings.VERSIONS_SDK2ROBOT[sdk_version]:
                 errstr_version = """RobotEnable: Software Version Mismatch.
 Robot Software version (%s) does not match local SDK version (%s). Please

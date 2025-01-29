@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2013-2015, Rethink Robotics
 # All rights reserved.
@@ -103,7 +103,7 @@ def main():
         help="control mode for trajectory execution"
     )
     args = parser.parse_args(rospy.myargv()[1:])
-    start_server(args.limb, args.rate, args.mode)
+    start_server(args.limb, int(args.rate), args.mode)
 
 
 if __name__ == "__main__":
